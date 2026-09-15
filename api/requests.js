@@ -30,8 +30,7 @@ export default async function handler(req, res) {
     if (user.must_change_password) return json(res, 403, { error: "Troque sua senha temporária antes de criar uma solicitação." });
     const financial = await sql`SELECT financial_status, amount_due, payment_due_date FROM portal_users WHERE id = ${user.id} LIMIT 1`;
     const account = financial[0];
-    const dueDate = account?.payment_due_date ? String(account.payment_due_date).slice(0, 10) : "";
-    const overdue = account?.financial_status === "overdue" || (Number(account?.amount_due) > 0 && dueDate && dueDate < new Date().toISOString().slice(0, 10));
+    const overdue = account?.financial_status === "overdue";
     if (overdue) return json(res, 403, { error: "Novas solicitações estão temporariamente indisponíveis devido a um pagamento em atraso." });
     const body = sanitize(req.body);
     if (!body.title || !body.platforms || !body.contentFormat || !body.objective || !body.details || !body.publicationDate) {

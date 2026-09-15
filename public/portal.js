@@ -101,6 +101,12 @@ $("#request-modal").addEventListener("click", (event) => {
   if (event.target === event.currentTarget) closeRequestModal();
 });
 
+$("#open-finance").addEventListener("click", () => $("#finance-modal").classList.remove("hidden"));
+document.querySelectorAll(".finance-modal-close").forEach((button) => button.addEventListener("click", () => $("#finance-modal").classList.add("hidden")));
+$("#finance-modal").addEventListener("click", (event) => {
+  if (event.target === event.currentTarget) event.currentTarget.classList.add("hidden");
+});
+
 $("#password-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
@@ -146,12 +152,18 @@ async function loadRequests() {
 
 function renderFinance(user) {
   const status = $("#finance-status");
-  const labels = { ok:"Em dia", pending:"Pendente", overdue:"Em atraso" };
+  const labels = { ok:"Em dia", overdue:"Em atraso" };
   status.textContent = labels[user.financialStatus] || "Em dia";
   status.className = "finance-status " + (user.financialStatus || "ok");
-  $("#amount-paid").textContent = formatCurrency(user.amountPaid);
-  $("#amount-due").textContent = formatCurrency(user.amountDue);
-  $("#payment-due-date").textContent = user.paymentDueDate ? "Vencimento: " + formatDate(user.paymentDueDate) : "";
+  const referenceDate = user.paymentDueDate ? new Date(String(user.paymentDueDate).slice(0, 10) + "T12:00:00Z") : new Date();
+  const month = new Intl.DateTimeFormat("pt-BR", { month:"long", year:"numeric", timeZone:"UTC" }).format(referenceDate);
+  $("#finance-reference").textContent = "Pagamento " + month.charAt(0).toUpperCase() + month.slice(1);
+  $("#finance-due-detail").textContent = user.paymentDueDate ? "Vencimento: " + formatDate(user.paymentDueDate) : "";
+  $("#finance-detail-amount").textContent = formatCurrency(user.amountDue);
+  const detailStatus = $("#finance-detail-status");
+  const open = user.financialStatus === "overdue";
+  detailStatus.textContent = open ? "Em aberto" : "Pago";
+  detailStatus.className = "payment-status " + (open ? "open" : "paid");
   const button = $("#open-request");
   const blocked = user.financialStatus === "overdue" || user.mustChangePassword;
   button.disabled = blocked;

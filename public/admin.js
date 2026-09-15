@@ -174,7 +174,7 @@ function renderUsers() {
     state.textContent = user.active ? "Ativo" : "Inativo";
     const finance = document.createElement("span");
     finance.className = "financial-state " + (user.financialStatus || "ok");
-    finance.textContent = ({ ok:"Em dia", pending:"Pendente", overdue:"Em atraso" })[user.financialStatus] || "Em dia";
+    finance.textContent = user.financialStatus === "overdue" ? "Em atraso" : "Em dia";
     const button = document.createElement("button");
     button.className = "edit-button";
     button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.2-1 10.6-10.6a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"/><path d="m14.5 6.5 3 3"/></svg><span>Editar</span>';
@@ -194,7 +194,6 @@ function openUserEditor(user) {
   form.elements.active.value = String(user.active);
   form.elements.password.value = "";
   form.elements.financialStatus.value = user.financialStatus || "ok";
-  form.elements.amountPaid.value = Number(user.amountPaid || 0).toFixed(2);
   form.elements.amountDue.value = Number(user.amountDue || 0).toFixed(2);
   form.elements.paymentDueDate.value = user.paymentDueDate ? String(user.paymentDueDate).slice(0, 10) : "";
   $(".form-message", form).textContent = "";

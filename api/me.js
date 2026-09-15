@@ -16,7 +16,5 @@ export default async function handler(req, res) {
 }
 
 function effectiveFinancialStatus(user) {
-  const dueDate = user.payment_due_date ? String(user.payment_due_date).slice(0, 10) : "";
-  if (user.financial_status === "overdue" || (Number(user.amount_due) > 0 && dueDate && dueDate < new Date().toISOString().slice(0, 10))) return "overdue";
-  return user.financial_status === "pending" ? "pending" : "ok";
+  return user.financial_status === "overdue" ? "overdue" : "ok";
 }
