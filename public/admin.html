@@ -24,5 +24,12 @@
       </div>
     </section>
   </main>
+  <div id="password-modal" class="modal-backdrop hidden">
+    <form id="password-form" class="panel modal"><h2>Crie sua nova senha</h2><p style="color:var(--muted)">Por segurança, altere a senha temporária antes de administrar a Central.</p>
+      <label>Senha temporária<input type="password" name="currentPassword" autocomplete="current-password" required></label>
+      <label style="margin-top:14px">Nova senha<input type="password" name="newPassword" minlength="10" autocomplete="new-password" required></label>
+      <button class="primary-button" style="width:100%;margin-top:20px" type="submit">Salvar nova senha</button><p class="form-message" role="alert"></p>
+    </form>
+  </div>
   <script src="/admin.js"></script>
 </body></html>
