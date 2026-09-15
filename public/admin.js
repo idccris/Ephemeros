@@ -84,6 +84,7 @@ function renderRequests() {
     return;
   }
   filtered.forEach((item) => list.append(adminRequestCard(item)));
+  window.lucide?.createIcons();
 }
 
 function adminRequestCard(item) {
@@ -108,7 +109,8 @@ function adminRequestCard(item) {
   const detail = document.createElement("div");
   detail.className = "detail-box";
   detail.textContent = item.details + (item.captionNotes ? "\n\nLegenda: " + item.captionNotes : "") + (item.referenceLinks ? "\n\nReferências: " + item.referenceLinks : "");
-  content.append(header, meta, detail);
+  const acceptance = acceptanceCard(item);
+  content.append(header, meta, detail, acceptance);
   const select = document.createElement("select");
   [["recebido","Recebido"],["briefing","Briefing"],["criacao","Em criação"],["revisao","Em revisão"],["aprovado","Aprovado"],["agendado","Agendado"],["publicado","Publicado"],["cancelado","Cancelado"]].forEach(([value,label]) => {
     const option = document.createElement("option");
@@ -131,6 +133,49 @@ function adminRequestCard(item) {
   });
   card.append(content, select);
   return card;
+}
+
+function acceptanceCard(item) {
+  const box = document.createElement("div");
+  box.className = "acceptance-record";
+  if (!item.acceptance) {
+    box.classList.add("missing");
+    box.innerHTML = '<div><strong>Sem aceite registrado</strong><span>Solicitação anterior à implantação do registro de plano.</span></div>';
+    return box;
+  }
+  const revoked = Boolean(item.acceptance.revokedAt);
+  box.classList.toggle("revoked", revoked);
+  const info = document.createElement("div");
+  const title = document.createElement("strong");
+  title.textContent = revoked ? "Aceite invalidado" : "Aceite do plano registrado";
+  const meta = document.createElement("span");
+  meta.textContent = `${item.acceptance.planName} · versão ${item.acceptance.planVersion} · ${formatDateTime(item.acceptance.acceptedAt)}`;
+  info.append(title, meta);
+  if (revoked) {
+    const reason = document.createElement("span");
+    reason.textContent = `Justificativa: ${item.acceptance.revokeReason}`;
+    info.append(reason);
+  }
+  const actions = document.createElement("div"); actions.className = "acceptance-actions";
+  const contract = document.createElement("a"); contract.className = "acceptance-link"; contract.href = `/api/contract?requestId=${item.id}`; contract.target = "_blank"; contract.rel = "noopener"; contract.innerHTML = '<i data-lucide="file-down" aria-hidden="true"></i><span>Contrato PDF</span>';
+  actions.append(contract);
+  if (!revoked) {
+    const revoke = document.createElement("button"); revoke.type = "button"; revoke.className = "revoke-acceptance"; revoke.textContent = "Invalidar aceite";
+    revoke.addEventListener("click", async () => {
+      const reason = window.prompt("Informe a justificativa para invalidar este aceite:");
+      if (!reason) return;
+      revoke.disabled = true;
+      try {
+        const data = await api("/api/requests", { method:"PATCH", body:JSON.stringify({ id:item.id, action:"revokeAcceptance", reason }) });
+        item.acceptance.revokedAt = data.acceptance.revokedAt;
+        item.acceptance.revokeReason = data.acceptance.revokeReason;
+        renderRequests();
+      } catch (error) { alert(error.message); revoke.disabled = false; }
+    });
+    actions.append(revoke);
+  }
+  box.append(info, actions);
+  return box;
 }
 
 $("#request-search").addEventListener("input", renderRequests);
@@ -255,6 +300,9 @@ function openUserEditor(user) {
   form.elements.financialStatus.value = user.financialStatus || "ok";
   form.elements.amountDue.value = Number(user.amountDue || 0).toFixed(2);
   form.elements.paymentDueDate.value = user.paymentDueDate ? String(user.paymentDueDate).slice(0, 10) : "";
+  form.elements.planName.value = user.planName || "Plano atual";
+  form.elements.planVersion.value = user.planVersion || "1.0";
+  form.elements.planTerms.value = user.planTerms || "";
   $(".form-message", form).textContent = "";
   $("#edit-user-modal").classList.remove("hidden");
   form.elements.displayName.focus();
@@ -325,6 +373,10 @@ $("#user-form").addEventListener("submit", async (event) => {
 function formatDate(value) {
   if (!value) return "—";
   return new Intl.DateTimeFormat("pt-BR", { timeZone:"UTC" }).format(new Date(String(value).slice(0,10) + "T12:00:00Z"));
+}
+function formatDateTime(value) {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle:"short", timeStyle:"short", timeZone:"America/Sao_Paulo" }).format(new Date(value));
 }
 boot();
 window.lucide?.createIcons();

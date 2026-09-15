@@ -41,6 +41,9 @@ export function ensureSchema() {
       await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS amount_paid NUMERIC(12,2) NOT NULL DEFAULT 0`;
       await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS amount_due NUMERIC(12,2) NOT NULL DEFAULT 0`;
       await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS payment_due_date DATE`;
+      await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS plan_name TEXT NOT NULL DEFAULT 'Plano atual'`;
+      await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS plan_version TEXT NOT NULL DEFAULT '1.0'`;
+      await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS plan_terms TEXT NOT NULL DEFAULT 'Condições do plano conforme a proposta comercial vigente entre as partes.'`;
       await sql`
         CREATE TABLE IF NOT EXISTS post_requests (
           id BIGSERIAL PRIMARY KEY,
@@ -62,6 +65,22 @@ export function ensureSchema() {
       `;
       await sql`CREATE INDEX IF NOT EXISTS post_requests_user_id_idx ON post_requests(user_id)`;
       await sql`CREATE INDEX IF NOT EXISTS post_requests_publication_date_idx ON post_requests(publication_date)`;
+      await sql`
+        CREATE TABLE IF NOT EXISTS request_plan_acceptances (
+          id BIGSERIAL PRIMARY KEY,
+          request_id BIGINT NOT NULL UNIQUE REFERENCES post_requests(id),
+          user_id BIGINT NOT NULL REFERENCES portal_users(id),
+          plan_name TEXT NOT NULL,
+          plan_version TEXT NOT NULL,
+          contract_snapshot TEXT NOT NULL,
+          accepted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          accepted_ip TEXT,
+          revoked_at TIMESTAMPTZ,
+          revoked_by BIGINT REFERENCES portal_users(id),
+          revoke_reason TEXT
+        )
+      `;
+      await sql`CREATE INDEX IF NOT EXISTS request_plan_acceptances_user_idx ON request_plan_acceptances(user_id, accepted_at DESC)`;
       await sql`
         CREATE TABLE IF NOT EXISTS login_attempts (
           id BIGSERIAL PRIMARY KEY,

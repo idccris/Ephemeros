@@ -10,7 +10,8 @@ export default async function handler(req, res) {
       id: String(user.id), username: user.username, displayName: user.display_name, email: user.email,
       role: user.role, mustChangePassword: user.must_change_password,
       financialStatus: effectiveFinancialStatus(user), amountPaid: Number(user.amount_paid || 0),
-      amountDue: Number(user.amount_due || 0), paymentDueDate: user.payment_due_date
+      amountDue: Number(user.amount_due || 0), paymentDueDate: user.payment_due_date,
+      planName: user.plan_name || "Plano atual", planVersion: user.plan_version || "1.0"
     }
   });
 }

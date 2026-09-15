@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     const rows = await sql`
       SELECT id, username, display_name, email, role, active, must_change_password, created_at,
-             financial_status, amount_paid, amount_due, payment_due_date
+             financial_status, amount_paid, amount_due, payment_due_date, plan_name, plan_version, plan_terms
       FROM portal_users ORDER BY role ASC, display_name ASC
     `;
     return json(res, 200, { users: rows.map(serialize) });
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         INSERT INTO portal_users (username, display_name, email, password_hash, password_salt, role, must_change_password)
         VALUES (${username}, ${displayName}, ${email}, ${secured.hash}, ${secured.salt}, 'client', TRUE)
         RETURNING id, username, display_name, email, role, active, must_change_password, created_at,
-                  financial_status, amount_paid, amount_due, payment_due_date
+                  financial_status, amount_paid, amount_due, payment_due_date, plan_name, plan_version, plan_terms
       `;
       return json(res, 201, { user: serialize(rows[0]) });
     } catch (error) {
@@ -54,6 +54,9 @@ export default async function handler(req, res) {
   const amountPaid = money(req.body?.amountPaid, current.amount_paid);
   const amountDue = money(req.body?.amountDue, current.amount_due);
   const paymentDueDate = /^\d{4}-\d{2}-\d{2}$/.test(String(req.body?.paymentDueDate || "")) ? req.body.paymentDueDate : null;
+  const planName = String(req.body?.planName ?? current.plan_name ?? "Plano atual").trim().slice(0, 160) || "Plano atual";
+  const planVersion = String(req.body?.planVersion ?? current.plan_version ?? "1.0").trim().slice(0, 40) || "1.0";
+  const planTerms = String(req.body?.planTerms ?? current.plan_terms ?? "").trim().slice(0, 20000);
   if (!/^[a-z0-9._-]{3,40}$/.test(username)) return json(res, 400, { error: "Use de 3 a 40 caracteres no usuário: letras, números, ponto, hífen ou sublinhado." });
   if (!displayName) return json(res, 400, { error: "Informe o nome do cliente." });
   if (password && password.length < 10) return json(res, 400, { error: "A nova senha deve ter pelo menos 10 caracteres." });
@@ -63,13 +66,14 @@ export default async function handler(req, res) {
       UPDATE portal_users SET
         username = ${username}, display_name = ${displayName}, email = ${email}, active = ${active},
         financial_status = ${financialStatus}, amount_paid = ${amountPaid}, amount_due = ${amountDue}, payment_due_date = ${paymentDueDate},
+        plan_name = ${planName}, plan_version = ${planVersion}, plan_terms = ${planTerms},
         password_hash = ${secured?.hash || current.password_hash},
         password_salt = ${secured?.salt || current.password_salt},
         must_change_password = ${password ? true : current.must_change_password},
         updated_at = NOW()
       WHERE id = ${id} AND role = 'client'
       RETURNING id, username, display_name, email, role, active, must_change_password, created_at,
-                financial_status, amount_paid, amount_due, payment_due_date
+                financial_status, amount_paid, amount_due, payment_due_date, plan_name, plan_version, plan_terms
     `;
     return json(res, 200, { user: serialize(rows[0]) });
   } catch (error) {
@@ -83,7 +87,8 @@ function serialize(row) {
     id: String(row.id), username: row.username, displayName: row.display_name, email: row.email, role: row.role,
     active: row.active, mustChangePassword: row.must_change_password, createdAt: row.created_at,
     financialStatus: row.financial_status === "overdue" ? "overdue" : "ok", amountPaid: Number(row.amount_paid || 0),
-    amountDue: Number(row.amount_due || 0), paymentDueDate: row.payment_due_date
+    amountDue: Number(row.amount_due || 0), paymentDueDate: row.payment_due_date,
+    planName: row.plan_name || "Plano atual", planVersion: row.plan_version || "1.0", planTerms: row.plan_terms || ""
   };
 }
 

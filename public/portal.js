@@ -39,6 +39,8 @@ async function loadSession() {
     clientView.classList.remove("hidden");
     logoutButton.classList.remove("hidden");
     $("#client-name").textContent = user.displayName;
+    const planLinkLabel = $("#current-plan-link span");
+    if (planLinkLabel) planLinkLabel.textContent = user.planName || "Plano Atual";
     $("#password-notice").classList.toggle("hidden", !user.mustChangePassword);
     $("#password-modal").classList.toggle("hidden", !user.mustChangePassword);
     renderFinance(user);

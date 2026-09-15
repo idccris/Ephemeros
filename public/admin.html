@@ -39,6 +39,10 @@
         <label>Situação do pagamento<select name="financialStatus"><option value="ok">Em dia</option><option value="overdue">Em atraso</option></select></label>
         <label>Vencimento<input type="date" name="paymentDueDate"></label>
         <label class="full">Valor da cobrança (R$)<input type="number" name="amountDue" min="0" step="0.01" inputmode="decimal"></label>
+        <div class="form-divider full"><strong>Plano atual e contrato</strong><span>O cliente acessa este conteúdo em PDF antes de aceitar.</span></div>
+        <label>Nome do plano<input name="planName" maxlength="160" placeholder="Ex.: Design mensal"></label>
+        <label>Versão do contrato<input name="planVersion" maxlength="40" placeholder="Ex.: 1.0 ou 09/2026"></label>
+        <label class="full">Termos do contrato<textarea name="planTerms" maxlength="20000" rows="10" placeholder="Descreva entregas, prazos, responsabilidades e condições do plano."></textarea></label>
       </div>
       <div class="modal-actions"><button type="button" class="ghost-button modal-cancel">Cancelar</button><button class="primary-button" type="submit">Salvar alterações</button></div>
       <p class="form-message" role="alert"></p>

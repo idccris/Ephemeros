@@ -51,6 +51,7 @@
         <label>Data de publicação *<input type="date" name="publicationDate" required></label>
         <label>Orientações para a legenda<textarea name="captionNotes" maxlength="2500" placeholder="Tom de voz, chamada, hashtags..."></textarea></label>
         <label class="full">Links de referência ou arquivos<textarea name="referenceLinks" maxlength="2500" placeholder="Cole links do Drive, referências, produtos ou materiais de apoio."></textarea></label>
+        <label class="full plan-consent"><input type="checkbox" name="planAccepted" value="true" required><span>Estou ciente e concordo plenamente com meu <a id="current-plan-link" href="/api/contract" target="_blank" rel="noopener"><span>Plano Atual</span> <i data-lucide="file-down" aria-hidden="true"></i></a>.</span></label>
       </div>
       <div class="modal-actions"><button type="button" class="ghost-button request-modal-cancel">Cancelar</button><button class="primary-button" type="submit">Enviar solicitação</button></div><p class="form-message" role="alert"></p>
     </form>
