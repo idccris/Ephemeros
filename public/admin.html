@@ -34,6 +34,11 @@
         <label>E-mail de contato<input type="email" name="email" maxlength="200"></label>
         <label>Status<select name="active"><option value="true">Ativo</option><option value="false">Inativo</option></select></label>
         <label class="full">Redefinir senha<div class="password-field"><input name="password" minlength="10" placeholder="Deixe em branco para manter"><button type="button" id="generate-password" class="inline-button">Gerar senha</button></div><small>Uma nova senha será temporária e deverá ser trocada no próximo acesso.</small></label>
+        <div class="form-divider full"><strong>Financeiro</strong><span>Estes valores aparecem na área do cliente.</span></div>
+        <label>Situação do pagamento<select name="financialStatus"><option value="ok">Em dia</option><option value="pending">Pendente</option><option value="overdue">Em atraso</option></select></label>
+        <label>Vencimento<input type="date" name="paymentDueDate"></label>
+        <label>Valor pago (R$)<input type="number" name="amountPaid" min="0" step="0.01" inputmode="decimal"></label>
+        <label>Valor em aberto (R$)<input type="number" name="amountDue" min="0" step="0.01" inputmode="decimal"></label>
       </div>
       <div class="modal-actions"><button type="button" class="ghost-button modal-cancel">Cancelar</button><button class="primary-button" type="submit">Salvar alterações</button></div>
       <p class="form-message" role="alert"></p>

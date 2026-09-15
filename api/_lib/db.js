@@ -37,6 +37,10 @@ export function ensureSchema() {
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
       `;
+      await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS financial_status TEXT NOT NULL DEFAULT 'ok'`;
+      await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS amount_paid NUMERIC(12,2) NOT NULL DEFAULT 0`;
+      await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS amount_due NUMERIC(12,2) NOT NULL DEFAULT 0`;
+      await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS payment_due_date DATE`;
       await sql`
         CREATE TABLE IF NOT EXISTS post_requests (
           id BIGSERIAL PRIMARY KEY,

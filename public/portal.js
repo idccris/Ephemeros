@@ -41,6 +41,7 @@ async function loadSession() {
     $("#client-name").textContent = user.displayName;
     $("#password-notice").classList.toggle("hidden", !user.mustChangePassword);
     $("#password-modal").classList.toggle("hidden", !user.mustChangePassword);
+    renderFinance(user);
     await loadRequests();
   } catch {
     authView.classList.remove("hidden");
@@ -74,13 +75,30 @@ $("#request-form").addEventListener("submit", async (event) => {
     const body = Object.fromEntries(new FormData(form));
     await api("/api/requests", { method: "POST", body: JSON.stringify(body) });
     form.reset();
-    showMessage(form, "Solicitação enviada com sucesso.", true);
+    closeRequestModal();
     await loadRequests();
   } catch (error) {
     showMessage(form, error.message);
   } finally {
     setLoading(form, false);
   }
+});
+
+$("#open-request").addEventListener("click", () => {
+  if (currentUser?.mustChangePassword || currentUser?.financialStatus === "overdue") return;
+  $("#request-modal").classList.remove("hidden");
+  $("#request-form").elements.title.focus();
+});
+
+function closeRequestModal() {
+  $("#request-modal").classList.add("hidden");
+  showMessage($("#request-form"), "");
+}
+
+$(".request-modal-close").addEventListener("click", closeRequestModal);
+$(".request-modal-cancel").addEventListener("click", closeRequestModal);
+$("#request-modal").addEventListener("click", (event) => {
+  if (event.target === event.currentTarget) closeRequestModal();
 });
 
 $("#password-form").addEventListener("submit", async (event) => {
@@ -94,6 +112,7 @@ $("#password-form").addEventListener("submit", async (event) => {
     currentUser.mustChangePassword = false;
     $("#password-modal").classList.add("hidden");
     $("#password-notice").classList.add("hidden");
+    renderFinance(currentUser);
     form.reset();
   } catch (error) {
     showMessage(form, error.message);
@@ -109,18 +128,40 @@ logoutButton.addEventListener("click", async () => {
 
 async function loadRequests() {
   const { requests } = await api("/api/requests");
-  $("#total-count").textContent = requests.length;
-  $("#open-count").textContent = requests.filter((item) => !["publicado", "cancelado"].includes(item.status)).length;
+  const upcoming = requests.filter((item) => !["publicado", "cancelado"].includes(item.status));
+  $("#completed-count").textContent = requests.filter((item) => item.status === "publicado").length;
+  $("#open-count").textContent = upcoming.length;
+  $("#upcoming-total").textContent = upcoming.length + " publicaç" + (upcoming.length === 1 ? "ão" : "ões");
   const list = $("#request-list");
   list.replaceChildren();
-  if (!requests.length) {
+  if (!upcoming.length) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "Nenhuma solicitação ainda.";
+    empty.textContent = "Nenhuma publicação programada.";
     list.append(empty);
     return;
   }
-  requests.slice(0, 8).forEach((item) => list.append(requestCard(item)));
+  upcoming.slice(0, 10).forEach((item) => list.append(requestCard(item)));
+}
+
+function renderFinance(user) {
+  const status = $("#finance-status");
+  const labels = { ok:"Em dia", pending:"Pendente", overdue:"Em atraso" };
+  status.textContent = labels[user.financialStatus] || "Em dia";
+  status.className = "finance-status " + (user.financialStatus || "ok");
+  $("#amount-paid").textContent = formatCurrency(user.amountPaid);
+  $("#amount-due").textContent = formatCurrency(user.amountDue);
+  $("#payment-due-date").textContent = user.paymentDueDate ? "Vencimento: " + formatDate(user.paymentDueDate) : "";
+  const button = $("#open-request");
+  const blocked = user.financialStatus === "overdue" || user.mustChangePassword;
+  button.disabled = blocked;
+  $("#request-action-note").textContent = user.financialStatus === "overdue"
+    ? "Indisponível: pagamento em atraso"
+    : user.mustChangePassword ? "Troque sua senha para continuar" : "Enviar briefing de conteúdo";
+}
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat("pt-BR", { style:"currency", currency:"BRL" }).format(Number(value || 0));
 }
 
 function requestCard(item) {

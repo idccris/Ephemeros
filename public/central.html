@@ -12,7 +12,7 @@
 <body>
   <header class="portal-container portal-topbar">
     <a class="portal-brand" href="/"><i></i><span>EPHEMEROS</span></a>
-    <div class="top-actions"><a class="ghost-button" href="/"><span class="back-label">Voltar ao site</span> ↗</a><button class="icon-button theme-button" aria-label="Alternar tema">◐</button><button id="logout" class="secondary-button hidden">Sair</button></div>
+    <div class="top-actions"><a class="ghost-button" href="/"><span class="back-label">Voltar ao site</span> ↗</a><button class="icon-button theme-button" aria-label="Alternar tema" title="Alternar tema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg></button><button id="logout" class="secondary-button hidden">Sair</button></div>
   </header>
 
   <main id="auth-view" class="portal-container auth-layout">
@@ -28,29 +28,33 @@
   </main>
 
   <main id="client-view" class="portal-container portal-main hidden">
-    <div class="dashboard-heading"><div><span class="eyebrow">Área do cliente</span><h1>Olá, <span id="client-name"></span>.</h1></div><p>Organize aqui as próximas publicações.</p></div>
+    <div class="dashboard-heading"><div><span class="eyebrow">Área do cliente</span><h1>Olá, <span id="client-name"></span>.</h1></div><p>Acompanhe seus conteúdos e pagamentos.</p></div>
     <div id="password-notice" class="notice hidden">Sua senha atual é temporária. Troque-a para poder enviar solicitações.</div>
-    <div class="dashboard-grid">
-      <section class="panel">
-        <div class="section-title"><h2>Nova solicitação</h2><span>* campos obrigatórios</span></div>
-        <form id="request-form" class="request-form form-grid">
-          <label class="full">Título da solicitação *<input name="title" maxlength="140" placeholder="Ex.: Campanha de lançamento" required></label>
-          <label>Onde será publicado? *<input name="platforms" maxlength="160" placeholder="Instagram, LinkedIn..." required></label>
-          <label>Formato *<select name="contentFormat" required><option value="">Selecione</option><option>Feed quadrado</option><option>Feed vertical 4:5</option><option>Story 9:16</option><option>Carrossel</option><option>Reels / vídeo</option><option>Outro</option></select></label>
-          <label class="full">Objetivo da publicação *<textarea name="objective" maxlength="500" placeholder="O que este conteúdo precisa comunicar ou gerar?" required></textarea></label>
-          <label class="full">Detalhes do que deve ser feito *<textarea name="details" maxlength="5000" placeholder="Descreva a ideia, produto, promoção, textos obrigatórios, estilo visual e outras informações importantes." required></textarea></label>
-          <label>Data de publicação *<input type="date" name="publicationDate" required></label>
-          <label>Orientações para a legenda<textarea name="captionNotes" maxlength="2500" placeholder="Tom de voz, chamada, hashtags..."></textarea></label>
-          <label class="full">Links de referência ou arquivos<textarea name="referenceLinks" maxlength="2500" placeholder="Cole links do Drive, referências, produtos ou materiais de apoio."></textarea></label>
-          <button class="primary-button full" type="submit">Enviar solicitação</button><p class="form-message full" role="alert"></p>
-        </form>
-      </section>
-      <aside class="aside-stack">
-        <div class="stats"><div class="stat"><strong id="total-count">0</strong><span>solicitações</span></div><div class="stat"><strong id="open-count">0</strong><span>em andamento</span></div></div>
-        <section class="panel"><div class="section-title"><h2>Próximas publicações</h2></div><div id="request-list" class="request-list"><div class="empty">Nenhuma solicitação ainda.</div></div></section>
-      </aside>
+    <div class="dashboard-overview">
+      <article class="summary-card"><span class="summary-icon done-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span><div><strong id="completed-count">0</strong><span>Solicitações concluídas</span></div></article>
+      <article class="summary-card"><span class="summary-icon progress-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span><div><strong id="open-count">0</strong><span>Em andamento</span></div></article>
+      <button id="open-request" class="action-card" type="button"><span class="plus-icon">+</span><span><strong>Nova solicitação</strong><small id="request-action-note">Enviar briefing de conteúdo</small></span></button>
+      <article class="finance-card"><div class="finance-card-heading"><span class="summary-icon money-icon">$</span><div><strong>Financeiro</strong><span id="finance-status" class="finance-status">Em dia</span></div></div><div class="finance-values"><div><small>Pago</small><strong id="amount-paid">R$ 0,00</strong></div><div><small>Em aberto</small><strong id="amount-due">R$ 0,00</strong></div></div><p id="payment-due-date" class="payment-due-date"></p></article>
     </div>
+    <section class="panel upcoming-panel"><div class="section-title"><div><h2>Próximas publicações</h2><p>Conteúdos solicitados e datas planejadas.</p></div><span id="upcoming-total">0 publicações</span></div><div id="request-list" class="request-list"><div class="empty">Nenhuma solicitação ainda.</div></div></section>
   </main>
+
+  <div id="request-modal" class="modal-backdrop hidden">
+    <form id="request-form" class="panel modal request-modal request-form">
+      <div class="modal-heading"><div><span class="eyebrow">Novo conteúdo</span><h2>Nova solicitação</h2></div><button type="button" class="modal-close request-modal-close" aria-label="Fechar formulário">×</button></div>
+      <div class="form-grid">
+        <label class="full">Título da solicitação *<input name="title" maxlength="140" placeholder="Ex.: Campanha de lançamento" required></label>
+        <label>Onde será publicado? *<input name="platforms" maxlength="160" placeholder="Instagram, LinkedIn..." required></label>
+        <label>Formato *<select name="contentFormat" required><option value="">Selecione</option><option>Feed quadrado</option><option>Feed vertical 4:5</option><option>Story 9:16</option><option>Carrossel</option><option>Reels / vídeo</option><option>Outro</option></select></label>
+        <label class="full">Objetivo da publicação *<textarea name="objective" maxlength="500" placeholder="O que este conteúdo precisa comunicar ou gerar?" required></textarea></label>
+        <label class="full">Detalhes do que deve ser feito *<textarea name="details" maxlength="5000" placeholder="Descreva a ideia, produto, promoção, textos obrigatórios, estilo visual e outras informações importantes." required></textarea></label>
+        <label>Data de publicação *<input type="date" name="publicationDate" required></label>
+        <label>Orientações para a legenda<textarea name="captionNotes" maxlength="2500" placeholder="Tom de voz, chamada, hashtags..."></textarea></label>
+        <label class="full">Links de referência ou arquivos<textarea name="referenceLinks" maxlength="2500" placeholder="Cole links do Drive, referências, produtos ou materiais de apoio."></textarea></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="ghost-button request-modal-cancel">Cancelar</button><button class="primary-button" type="submit">Enviar solicitação</button></div><p class="form-message" role="alert"></p>
+    </form>
+  </div>
 
   <div id="password-modal" class="modal-backdrop hidden">
     <form id="password-form" class="panel modal"><h2>Crie sua nova senha</h2><p style="color:var(--muted)">Por segurança, altere a senha temporária antes de usar a Central.</p>
