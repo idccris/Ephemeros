@@ -84,7 +84,7 @@ export async function getSessionUser(req) {
     const sql = db();
     const rows = await sql`
       SELECT id, username, display_name, email, role, active, must_change_password,
-             financial_status, amount_paid, amount_due, payment_due_date
+             financial_status, amount_paid, amount_due, payment_due_date, billing_type
              , plan_name, plan_version, plan_terms
       FROM portal_users WHERE id = ${session.id} LIMIT 1
     `;

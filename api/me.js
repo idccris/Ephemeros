@@ -11,6 +11,7 @@ export default async function handler(req, res) {
       role: user.role, mustChangePassword: user.must_change_password,
       financialStatus: effectiveFinancialStatus(user), amountPaid: Number(user.amount_paid || 0),
       amountDue: Number(user.amount_due || 0), paymentDueDate: user.payment_due_date,
+      billingType: user.billing_type === "monthly" ? "monthly" : "one_time",
       planName: user.plan_name || "Plano atual", planVersion: user.plan_version || "1.0"
     }
   });

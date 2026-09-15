@@ -157,10 +157,11 @@ function renderFinance(user) {
   const labels = { ok:"Em dia", overdue:"Em atraso" };
   status.textContent = labels[user.financialStatus] || "Em dia";
   status.className = "finance-status " + (user.financialStatus || "ok");
-  const referenceDate = user.paymentDueDate ? new Date(String(user.paymentDueDate).slice(0, 10) + "T12:00:00Z") : new Date();
+  const referenceDate = billingReferenceDate(user);
   const month = new Intl.DateTimeFormat("pt-BR", { month:"long", year:"numeric", timeZone:"UTC" }).format(referenceDate);
   $("#finance-reference").textContent = "Pagamento " + month.charAt(0).toUpperCase() + month.slice(1);
-  $("#finance-due-detail").textContent = user.paymentDueDate ? "Vencimento: " + formatDate(user.paymentDueDate) : "";
+  const typeLabel = user.billingType === "monthly" ? "Mensal recorrente" : "Trabalho pontual";
+  $("#finance-due-detail").textContent = typeLabel + (user.paymentDueDate ? " · Vencimento: " + formatDate(referenceDate.toISOString().slice(0, 10)) : "");
   $("#finance-detail-amount").textContent = formatCurrency(user.amountDue);
   const detailStatus = $("#finance-detail-status");
   const open = user.financialStatus === "overdue";
@@ -172,6 +173,15 @@ function renderFinance(user) {
   $("#request-action-note").textContent = user.financialStatus === "overdue"
     ? "Indisponível: pagamento em atraso"
     : user.mustChangePassword ? "Troque sua senha para continuar" : "Enviar briefing de conteúdo";
+}
+
+function billingReferenceDate(user) {
+  if (user.billingType !== "monthly") return user.paymentDueDate ? new Date(String(user.paymentDueDate).slice(0, 10) + "T12:00:00Z") : new Date();
+  const now = new Date();
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en", { timeZone:"America/Sao_Paulo", year:"numeric", month:"2-digit" }).formatToParts(now).map((part) => [part.type, part.value]));
+  const configuredDay = user.paymentDueDate ? Number(String(user.paymentDueDate).slice(8, 10)) : 1;
+  const lastDay = new Date(Date.UTC(Number(parts.year), Number(parts.month), 0)).getUTCDate();
+  return new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Math.min(configuredDay, lastDay), 12));
 }
 
 function formatCurrency(value) {

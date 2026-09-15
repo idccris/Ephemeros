@@ -298,6 +298,7 @@ function openUserEditor(user) {
   form.elements.active.value = String(user.active);
   form.elements.password.value = "";
   form.elements.financialStatus.value = user.financialStatus || "ok";
+  form.elements.billingType.value = user.billingType || "one_time";
   form.elements.amountDue.value = Number(user.amountDue || 0).toFixed(2);
   form.elements.paymentDueDate.value = user.paymentDueDate ? String(user.paymentDueDate).slice(0, 10) : "";
   form.elements.planName.value = user.planName || "Plano atual";

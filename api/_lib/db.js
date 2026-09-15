@@ -41,6 +41,7 @@ export function ensureSchema() {
       await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS amount_paid NUMERIC(12,2) NOT NULL DEFAULT 0`;
       await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS amount_due NUMERIC(12,2) NOT NULL DEFAULT 0`;
       await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS payment_due_date DATE`;
+      await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS billing_type TEXT NOT NULL DEFAULT 'one_time'`;
       await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS plan_name TEXT NOT NULL DEFAULT 'Plano atual'`;
       await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS plan_version TEXT NOT NULL DEFAULT '1.0'`;
       await sql`ALTER TABLE portal_users ADD COLUMN IF NOT EXISTS plan_terms TEXT NOT NULL DEFAULT 'Condições do plano conforme a proposta comercial vigente entre as partes.'`;
