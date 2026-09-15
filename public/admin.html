@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Painel Ephemeros</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#050505">
+  <script>(()=>{document.documentElement.dataset.theme=localStorage.getItem("ephemeros-theme")==="light"?"light":"dark"})()</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/portal.css">
+</head><body>
+  <header class="portal-container portal-topbar"><a class="portal-brand" href="/"><i></i><span>EPHEMEROS</span></a><div class="top-actions"><a class="ghost-button" href="/central">Central</a><button class="icon-button theme-button" aria-label="Alternar tema">◐</button><button id="logout" class="secondary-button">Sair</button></div></header>
+  <main class="portal-container portal-main">
+    <div class="dashboard-heading"><div><span class="eyebrow">Administração</span><h1>Painel Ephemeros</h1></div><p id="admin-name"></p></div>
+    <div class="admin-tabs"><button class="active" data-tab="requests">Solicitações</button><button data-tab="users">Clientes</button></div>
+    <section id="requests-tab" class="panel"><div class="section-title"><h2>Solicitações de conteúdo</h2><span id="request-total"></span></div><div class="toolbar"><input id="request-search" placeholder="Buscar cliente ou solicitação"><select id="status-filter"><option value="">Todos os status</option><option value="recebido">Recebido</option><option value="briefing">Briefing</option><option value="criacao">Em criação</option><option value="revisao">Em revisão</option><option value="aprovado">Aprovado</option><option value="agendado">Agendado</option><option value="publicado">Publicado</option><option value="cancelado">Cancelado</option></select></div><div id="admin-request-list" class="request-list"><div class="empty">Carregando...</div></div></section>
+    <section id="users-tab" class="hidden">
+      <div class="dashboard-grid">
+        <form id="user-form" class="panel"><div class="section-title"><h2>Criar acesso de cliente</h2></div><div class="form-grid">
+          <label class="full">Nome do cliente *<input name="displayName" maxlength="120" required></label>
+          <label>Usuário *<input name="username" maxlength="40" placeholder="empresa.cliente" required></label>
+          <label>E-mail de contato<input type="email" name="email" maxlength="200"></label>
+          <label class="full">Senha temporária *<input type="password" name="password" minlength="10" required><small>O cliente será obrigado a trocar no primeiro acesso.</small></label>
+          <button class="primary-button full" type="submit">Criar usuário</button><p class="form-message full" role="alert"></p>
+        </div></form>
+        <section class="panel"><div class="section-title"><h2>Clientes cadastrados</h2><span id="user-total"></span></div><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Usuário</th><th>Status</th><th></th></tr></thead><tbody id="users-body"></tbody></table></div></section>
+      </div>
+    </section>
+  </main>
+  <script src="/admin.js"></script>
+</body></html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Central do Cliente — Ephemeros</title>
+  <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#050505">
+  <script>(()=>{document.documentElement.dataset.theme=localStorage.getItem("ephemeros-theme")==="light"?"light":"dark"})()</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/portal.css">
+</head>
+<body>
+  <header class="portal-container portal-topbar">
+    <a class="portal-brand" href="/"><i></i><span>EPHEMEROS</span></a>
+    <div class="top-actions"><a class="ghost-button" href="/"><span class="back-label">Voltar ao site</span> ↗</a><button class="icon-button theme-button" aria-label="Alternar tema">◐</button><button id="logout" class="secondary-button hidden">Sair</button></div>
+  </header>
+
+  <main id="auth-view" class="portal-container auth-layout">
+    <section class="auth-copy"><div class="eyebrow">Central do Cliente</div><h1>Seus conteúdos,<br><em>bem organizados.</em></h1><p>Solicite novas artes, escolha a data de publicação e acompanhe cada etapa do trabalho em um só lugar.</p></section>
+    <form id="login-form" class="panel auth-card">
+      <h2>Acessar sua conta</h2><p>Use o usuário e a senha fornecidos pela Ephemeros.</p>
+      <label>Usuário<input name="username" autocomplete="username" required></label>
+      <label style="margin-top:16px">Senha<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="primary-button" type="submit">Entrar na Central</button>
+      <p class="form-message" role="alert"></p>
+      <div class="privacy-note">Não existe cadastro público. Seu acesso é criado pela Ephemeros.</div>
+    </form>
+  </main>
+
+  <main id="client-view" class="portal-container portal-main hidden">
+    <div class="dashboard-heading"><div><span class="eyebrow">Área do cliente</span><h1>Olá, <span id="client-name"></span>.</h1></div><p>Organize aqui as próximas publicações.</p></div>
+    <div id="password-notice" class="notice hidden">Sua senha atual é temporária. Troque-a para poder enviar solicitações.</div>
+    <div class="dashboard-grid">
+      <section class="panel">
+        <div class="section-title"><h2>Nova solicitação</h2><span>* campos obrigatórios</span></div>
+        <form id="request-form" class="request-form form-grid">
+          <label class="full">Título da solicitação *<input name="title" maxlength="140" placeholder="Ex.: Campanha de lançamento" required></label>
+          <label>Onde será publicado? *<input name="platforms" maxlength="160" placeholder="Instagram, LinkedIn..." required></label>
+          <label>Formato *<select name="contentFormat" required><option value="">Selecione</option><option>Feed quadrado</option><option>Feed vertical 4:5</option><option>Story 9:16</option><option>Carrossel</option><option>Reels / vídeo</option><option>Outro</option></select></label>
+          <label class="full">Objetivo da publicação *<textarea name="objective" maxlength="500" placeholder="O que este conteúdo precisa comunicar ou gerar?" required></textarea></label>
+          <label class="full">Detalhes do que deve ser feito *<textarea name="details" maxlength="5000" placeholder="Descreva a ideia, produto, promoção, textos obrigatórios, estilo visual e outras informações importantes." required></textarea></label>
+          <label>Data de publicação *<input type="date" name="publicationDate" required></label>
+          <label>Orientações para a legenda<textarea name="captionNotes" maxlength="2500" placeholder="Tom de voz, chamada, hashtags..."></textarea></label>
+          <label class="full">Links de referência ou arquivos<textarea name="referenceLinks" maxlength="2500" placeholder="Cole links do Drive, referências, produtos ou materiais de apoio."></textarea></label>
+          <button class="primary-button full" type="submit">Enviar solicitação</button><p class="form-message full" role="alert"></p>
+        </form>
+      </section>
+      <aside class="aside-stack">
+        <div class="stats"><div class="stat"><strong id="total-count">0</strong><span>solicitações</span></div><div class="stat"><strong id="open-count">0</strong><span>em andamento</span></div></div>
+        <section class="panel"><div class="section-title"><h2>Próximas publicações</h2></div><div id="request-list" class="request-list"><div class="empty">Nenhuma solicitação ainda.</div></div></section>
+      </aside>
+    </div>
+  </main>
+
+  <div id="password-modal" class="modal-backdrop hidden">
+    <form id="password-form" class="panel modal"><h2>Crie sua nova senha</h2><p style="color:var(--muted)">Por segurança, altere a senha temporária antes de usar a Central.</p>
+      <label>Senha temporária<input type="password" name="currentPassword" autocomplete="current-password" required></label>
+      <label style="margin-top:14px">Nova senha<input type="password" name="newPassword" minlength="10" autocomplete="new-password" required></label>
+      <button class="primary-button" style="width:100%;margin-top:20px" type="submit">Salvar nova senha</button><p class="form-message" role="alert"></p>
+    </form>
+  </div>
+  <script src="/portal.js"></script>
+</body></html>
