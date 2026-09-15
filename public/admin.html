@@ -6,24 +6,39 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/portal.css">
 </head><body>
-  <header class="portal-container portal-topbar"><a class="portal-brand" href="/"><i></i><span>EPHEMEROS</span></a><div class="top-actions"><a class="ghost-button" href="/central">Central</a><button class="icon-button theme-button" aria-label="Alternar tema">◐</button><button id="logout" class="secondary-button">Sair</button></div></header>
+  <header class="portal-container portal-topbar"><a class="portal-brand" href="/"><i></i><span>EPHEMEROS</span></a><div class="top-actions"><a class="ghost-button" href="/central">Central</a><button class="icon-button theme-button" aria-label="Alternar tema" title="Alternar tema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg></button><button id="logout" class="secondary-button">Sair</button></div></header>
   <main class="portal-container portal-main">
     <div class="dashboard-heading"><div><span class="eyebrow">Administração</span><h1>Painel Ephemeros</h1></div><p id="admin-name"></p></div>
     <div class="admin-tabs"><button class="active" data-tab="requests">Solicitações</button><button data-tab="users">Clientes</button></div>
     <section id="requests-tab" class="panel"><div class="section-title"><h2>Solicitações de conteúdo</h2><span id="request-total"></span></div><div class="toolbar"><input id="request-search" placeholder="Buscar cliente ou solicitação"><select id="status-filter"><option value="">Todos os status</option><option value="recebido">Recebido</option><option value="briefing">Briefing</option><option value="criacao">Em criação</option><option value="revisao">Em revisão</option><option value="aprovado">Aprovado</option><option value="agendado">Agendado</option><option value="publicado">Publicado</option><option value="cancelado">Cancelado</option></select></div><div id="admin-request-list" class="request-list"><div class="empty">Carregando...</div></div></section>
     <section id="users-tab" class="hidden">
-      <div class="dashboard-grid">
-        <form id="user-form" class="panel"><div class="section-title"><h2>Criar acesso de cliente</h2></div><div class="form-grid">
+      <div class="clients-layout">
+        <section class="panel clients-panel"><div class="section-title"><div><h2>Clientes cadastrados</h2><p>Gerencie os acessos e dados de cada cliente.</p></div><span id="user-total"></span></div><div id="client-list" class="client-list"></div></section>
+        <form id="user-form" class="panel"><div class="section-title"><div><h2>Criar acesso de cliente</h2><p>Somente a Ephemeros pode cadastrar novos acessos.</p></div></div><div class="form-grid">
           <label class="full">Nome do cliente *<input name="displayName" maxlength="120" required></label>
           <label>Usuário *<input name="username" maxlength="40" placeholder="empresa.cliente" required></label>
           <label>E-mail de contato<input type="email" name="email" maxlength="200"></label>
           <label class="full">Senha temporária *<input type="password" name="password" minlength="10" required><small>O cliente será obrigado a trocar no primeiro acesso.</small></label>
           <button class="primary-button full" type="submit">Criar usuário</button><p class="form-message full" role="alert"></p>
         </div></form>
-        <section class="panel"><div class="section-title"><h2>Clientes cadastrados</h2><span id="user-total"></span></div><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Usuário</th><th>Status</th><th></th></tr></thead><tbody id="users-body"></tbody></table></div></section>
       </div>
     </section>
   </main>
+  <div id="edit-user-modal" class="modal-backdrop hidden">
+    <form id="edit-user-form" class="panel modal edit-user-modal">
+      <div class="modal-heading"><div><span class="eyebrow">Editar cliente</span><h2>Dados de acesso</h2></div><button type="button" class="modal-close" aria-label="Fechar edição">×</button></div>
+      <input type="hidden" name="id">
+      <div class="form-grid">
+        <label class="full">Nome do cliente *<input name="displayName" maxlength="120" required></label>
+        <label>Usuário *<input name="username" maxlength="40" required></label>
+        <label>E-mail de contato<input type="email" name="email" maxlength="200"></label>
+        <label>Status<select name="active"><option value="true">Ativo</option><option value="false">Inativo</option></select></label>
+        <label class="full">Redefinir senha<div class="password-field"><input name="password" minlength="10" placeholder="Deixe em branco para manter"><button type="button" id="generate-password" class="inline-button">Gerar senha</button></div><small>Uma nova senha será temporária e deverá ser trocada no próximo acesso.</small></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="ghost-button modal-cancel">Cancelar</button><button class="primary-button" type="submit">Salvar alterações</button></div>
+      <p class="form-message" role="alert"></p>
+    </form>
+  </div>
   <div id="password-modal" class="modal-backdrop hidden">
     <form id="password-form" class="panel modal"><h2>Crie sua nova senha</h2><p style="color:var(--muted)">Por segurança, altere a senha temporária antes de administrar a Central.</p>
       <label>Senha temporária<input type="password" name="currentPassword" autocomplete="current-password" required></label>
