@@ -20,6 +20,7 @@ async function boot() {
     const { user } = await api("/api/me");
     if (user.role !== "admin") return location.replace("/central");
     $("#admin-name").textContent = user.displayName;
+    $("#password-modal").classList.toggle("hidden", !user.mustChangePassword);
     await Promise.all([loadRequests(), loadUsers()]);
   } catch {
     location.replace("/central");
@@ -35,6 +36,26 @@ document.querySelectorAll(".admin-tabs button").forEach((button) => button.addEv
 $("#logout").addEventListener("click", async () => {
   await api("/api/logout", { method: "POST", body: "{}" }).catch(() => {});
   location.replace("/central");
+});
+
+$("#password-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const message = $(".form-message", form);
+  const button = $('button[type="submit"]', form);
+  message.textContent = "";
+  message.classList.remove("success");
+  button.disabled = true;
+  try {
+    const payload = Object.fromEntries(new FormData(form));
+    await api("/api/change-password", { method:"POST", body:JSON.stringify(payload) });
+    form.reset();
+    $("#password-modal").classList.add("hidden");
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
 });
 
 async function loadRequests() {
