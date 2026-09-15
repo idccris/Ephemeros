@@ -143,39 +143,97 @@ async function loadUsers() {
 function renderUsers() {
   const clients = allUsers.filter((user) => user.role === "client");
   $("#user-total").textContent = clients.length + " cliente" + (clients.length === 1 ? "" : "s");
-  const body = $("#users-body");
-  body.replaceChildren();
+  const list = $("#client-list");
+  list.replaceChildren();
+  if (!clients.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Nenhum cliente cadastrado ainda.";
+    list.append(empty);
+    return;
+  }
   clients.forEach((user) => {
-    const row = document.createElement("tr");
-    const name = document.createElement("td");
+    const card = document.createElement("article");
+    card.className = "client-card";
+    const identity = document.createElement("div");
+    identity.className = "client-identity";
+    const avatar = document.createElement("span");
+    avatar.className = "client-avatar";
+    avatar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+    const details = document.createElement("div");
+    const name = document.createElement("strong");
     name.textContent = user.displayName;
-    const username = document.createElement("td");
-    username.textContent = "@" + user.username;
-    const stateCell = document.createElement("td");
+    const meta = document.createElement("span");
+    meta.textContent = "@" + user.username + (user.email ? " · " + user.email : "");
+    details.append(name, meta);
+    identity.append(avatar, details);
+    const controls = document.createElement("div");
+    controls.className = "client-controls";
     const state = document.createElement("span");
     state.className = "user-state" + (user.active ? "" : " off");
     state.textContent = user.active ? "Ativo" : "Inativo";
-    stateCell.append(state);
-    const actionCell = document.createElement("td");
     const button = document.createElement("button");
-    button.className = "small-action";
-    button.textContent = user.active ? "Desativar" : "Ativar";
-    button.addEventListener("click", async () => {
-      button.disabled = true;
-      try {
-        const data = await api("/api/users", { method:"PATCH", body:JSON.stringify({ id:user.id, active:!user.active }) });
-        Object.assign(user, data.user);
-        renderUsers();
-      } catch (error) {
-        alert(error.message);
-        button.disabled = false;
-      }
-    });
-    actionCell.append(button);
-    row.append(name, username, stateCell, actionCell);
-    body.append(row);
+    button.className = "edit-button";
+    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.2-1 10.6-10.6a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"/><path d="m14.5 6.5 3 3"/></svg><span>Editar</span>';
+    button.addEventListener("click", () => openUserEditor(user));
+    controls.append(state, button);
+    card.append(identity, controls);
+    list.append(card);
   });
 }
+
+function openUserEditor(user) {
+  const form = $("#edit-user-form");
+  form.elements.id.value = user.id;
+  form.elements.displayName.value = user.displayName;
+  form.elements.username.value = user.username;
+  form.elements.email.value = user.email || "";
+  form.elements.active.value = String(user.active);
+  form.elements.password.value = "";
+  $(".form-message", form).textContent = "";
+  $("#edit-user-modal").classList.remove("hidden");
+  form.elements.displayName.focus();
+}
+
+function closeUserEditor() {
+  $("#edit-user-modal").classList.add("hidden");
+  $("#edit-user-form").reset();
+}
+
+$(".modal-close").addEventListener("click", closeUserEditor);
+$(".modal-cancel").addEventListener("click", closeUserEditor);
+$("#edit-user-modal").addEventListener("click", (event) => {
+  if (event.target === event.currentTarget) closeUserEditor();
+});
+
+$("#generate-password").addEventListener("click", () => {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+  const values = crypto.getRandomValues(new Uint32Array(16));
+  $("#edit-user-form").elements.password.value = Array.from(values, (value) => alphabet[value % alphabet.length]).join("");
+});
+
+$("#edit-user-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const message = $(".form-message", form);
+  const button = $('button[type="submit"]', form);
+  message.textContent = "";
+  message.classList.remove("success");
+  button.disabled = true;
+  try {
+    const payload = Object.fromEntries(new FormData(form));
+    payload.active = payload.active === "true";
+    const data = await api("/api/users", { method:"PATCH", body:JSON.stringify(payload) });
+    const index = allUsers.findIndex((user) => user.id === data.user.id);
+    if (index >= 0) allUsers[index] = data.user;
+    renderUsers();
+    closeUserEditor();
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
 
 $("#user-form").addEventListener("submit", async (event) => {
   event.preventDefault();
