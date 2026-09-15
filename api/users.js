@@ -40,15 +40,34 @@ export default async function handler(req, res) {
 
   const id = String(req.body?.id || "");
   if (!/^\d+$/.test(id)) return json(res, 400, { error: "Usuário inválido." });
-  if (id === String(admin.id) && req.body?.active === false) return json(res, 400, { error: "Você não pode desativar seu próprio acesso." });
-  const active = Boolean(req.body?.active);
-  const rows = await sql`
-    UPDATE portal_users SET active = ${active}, updated_at = NOW()
-    WHERE id = ${id} AND role = 'client'
-    RETURNING id, username, display_name, email, role, active, must_change_password, created_at
-  `;
-  if (!rows[0]) return json(res, 404, { error: "Cliente não encontrado." });
-  return json(res, 200, { user: serialize(rows[0]) });
+  const currentRows = await sql`SELECT * FROM portal_users WHERE id = ${id} AND role = 'client' LIMIT 1`;
+  const current = currentRows[0];
+  if (!current) return json(res, 404, { error: "Cliente não encontrado." });
+  const username = normalizeUsername(req.body?.username ?? current.username);
+  const displayName = String(req.body?.displayName ?? current.display_name).trim().slice(0, 120);
+  const email = String(req.body?.email ?? current.email ?? "").trim().toLowerCase().slice(0, 200) || null;
+  const active = typeof req.body?.active === "boolean" ? req.body.active : current.active;
+  const password = String(req.body?.password || "");
+  if (!/^[a-z0-9._-]{3,40}$/.test(username)) return json(res, 400, { error: "Use de 3 a 40 caracteres no usuário: letras, números, ponto, hífen ou sublinhado." });
+  if (!displayName) return json(res, 400, { error: "Informe o nome do cliente." });
+  if (password && password.length < 10) return json(res, 400, { error: "A nova senha deve ter pelo menos 10 caracteres." });
+  const secured = password ? await hashPassword(password) : null;
+  try {
+    const rows = await sql`
+      UPDATE portal_users SET
+        username = ${username}, display_name = ${displayName}, email = ${email}, active = ${active},
+        password_hash = ${secured?.hash || current.password_hash},
+        password_salt = ${secured?.salt || current.password_salt},
+        must_change_password = ${password ? true : current.must_change_password},
+        updated_at = NOW()
+      WHERE id = ${id} AND role = 'client'
+      RETURNING id, username, display_name, email, role, active, must_change_password, created_at
+    `;
+    return json(res, 200, { user: serialize(rows[0]) });
+  } catch (error) {
+    if (String(error).includes("unique")) return json(res, 409, { error: "Esse nome de usuário já existe." });
+    throw error;
+  }
 }
 
 function serialize(row) {
