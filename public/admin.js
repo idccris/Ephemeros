@@ -1,6 +1,7 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 let allRequests = [];
 let allUsers = [];
+let allAppointments = [];
 
 document.querySelectorAll(".theme-button").forEach((button) => button.addEventListener("click", () => {
   const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
@@ -21,7 +22,7 @@ async function boot() {
     if (user.role !== "admin") return location.replace("/central");
     $("#admin-name").textContent = user.displayName;
     $("#password-modal").classList.toggle("hidden", !user.mustChangePassword);
-    await Promise.all([loadRequests(), loadUsers()]);
+    await Promise.all([loadRequests(), loadUsers(), loadAppointments()]);
   } catch {
     location.replace("/central");
   }
@@ -31,6 +32,7 @@ document.querySelectorAll(".admin-tabs button").forEach((button) => button.addEv
   document.querySelectorAll(".admin-tabs button").forEach((item) => item.classList.toggle("active", item === button));
   $("#requests-tab").classList.toggle("hidden", button.dataset.tab !== "requests");
   $("#users-tab").classList.toggle("hidden", button.dataset.tab !== "users");
+  $("#appointments-tab").classList.toggle("hidden", button.dataset.tab !== "appointments");
 }));
 
 $("#logout").addEventListener("click", async () => {
@@ -133,6 +135,62 @@ function adminRequestCard(item) {
 
 $("#request-search").addEventListener("input", renderRequests);
 $("#status-filter").addEventListener("change", renderRequests);
+
+async function loadAppointments() {
+  const data = await api("/api/appointments?view=admin");
+  allAppointments = data.appointments;
+  renderAppointments();
+}
+
+function renderAppointments() {
+  const search = $("#appointment-search").value.trim().toLowerCase();
+  const status = $("#appointment-filter").value;
+  const filtered = allAppointments.filter((item) => {
+    const haystack = `${item.fullName} ${item.company || ""} ${item.email} ${item.phone}`.toLowerCase();
+    return (!search || haystack.includes(search)) && (!status || item.status === status);
+  });
+  const pending = allAppointments.filter((item) => item.status === "pending").length;
+  $("#appointment-total").textContent = filtered.length + " reunião" + (filtered.length === 1 ? "" : "ões");
+  $("#appointment-badge").textContent = String(pending);
+  $("#appointment-badge").classList.toggle("hidden", pending === 0);
+  const list = $("#appointment-list");
+  list.replaceChildren();
+  if (!filtered.length) {
+    const empty = document.createElement("div"); empty.className = "empty"; empty.textContent = "Nenhuma reunião encontrada."; list.append(empty); return;
+  }
+  filtered.forEach((item) => list.append(appointmentCard(item)));
+  window.lucide?.createIcons();
+}
+
+function appointmentCard(item) {
+  const card = document.createElement("article"); card.className = "appointment-card";
+  const icon = document.createElement("span"); icon.className = "appointment-icon"; icon.innerHTML = '<i data-lucide="calendar-clock" aria-hidden="true"></i>';
+  const content = document.createElement("div"); content.className = "appointment-content";
+  const title = document.createElement("div"); title.className = "appointment-title";
+  const heading = document.createElement("div");
+  const name = document.createElement("h3"); name.textContent = item.fullName;
+  const company = document.createElement("p"); company.textContent = item.company || "Sem empresa informada";
+  heading.append(name, company);
+  const date = document.createElement("strong"); date.textContent = `${formatDate(item.meetingDate)} às ${item.meetingTime}`;
+  title.append(heading, date);
+  const meta = document.createElement("div"); meta.className = "appointment-meta";
+  [item.email, item.phone, "30 minutos"].forEach((value) => { const span = document.createElement("span"); span.textContent = value; meta.append(span); });
+  content.append(title, meta);
+  if (item.notes) { const notes = document.createElement("p"); notes.className = "appointment-notes"; notes.textContent = item.notes; content.append(notes); }
+  const select = document.createElement("select"); select.className = "appointment-status";
+  [["pending","Pendente"],["confirmed","Confirmada"],["cancelled","Cancelada"]].forEach(([value,label]) => { const option = document.createElement("option"); option.value = value; option.textContent = label; option.selected = item.status === value; select.append(option); });
+  select.addEventListener("change", async () => {
+    select.disabled = true;
+    try { await api("/api/appointments", { method:"PATCH", body:JSON.stringify({ id:item.id, status:select.value }) }); item.status = select.value; renderAppointments(); }
+    catch (error) { alert(error.message); select.value = item.status; }
+    finally { select.disabled = false; }
+  });
+  card.append(icon, content, select);
+  return card;
+}
+
+$("#appointment-search").addEventListener("input", renderAppointments);
+$("#appointment-filter").addEventListener("change", renderAppointments);
 
 async function loadUsers() {
   const data = await api("/api/users");

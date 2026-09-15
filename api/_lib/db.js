@@ -71,6 +71,26 @@ export function ensureSchema() {
         )
       `;
       await sql`CREATE INDEX IF NOT EXISTS login_attempts_lookup_idx ON login_attempts(username, ip, attempted_at)`;
+      await sql`
+        CREATE TABLE IF NOT EXISTS meeting_appointments (
+          id BIGSERIAL PRIMARY KEY,
+          meeting_date DATE NOT NULL,
+          meeting_time TIME NOT NULL,
+          start_at TIMESTAMPTZ NOT NULL,
+          duration_minutes INTEGER NOT NULL DEFAULT 30 CHECK (duration_minutes = 30),
+          full_name TEXT NOT NULL,
+          email TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          company TEXT,
+          notes TEXT,
+          requester_ip TEXT,
+          status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','confirmed','cancelled')),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `;
+      await sql`CREATE UNIQUE INDEX IF NOT EXISTS meeting_appointments_slot_idx ON meeting_appointments(meeting_date, meeting_time) WHERE status <> 'cancelled'`;
+      await sql`CREATE INDEX IF NOT EXISTS meeting_appointments_date_idx ON meeting_appointments(meeting_date, meeting_time)`;
     })().catch((error) => {
       schemaPromise = undefined;
       throw error;

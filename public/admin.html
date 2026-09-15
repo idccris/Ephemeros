@@ -9,7 +9,7 @@
   <header class="portal-container portal-topbar"><a class="portal-brand" href="/"><i></i><span>EPHEMEROS</span></a><div class="top-actions"><a class="ghost-button" href="/central"><i data-lucide="layout-dashboard" aria-hidden="true"></i><span>Central</span></a><button class="icon-button theme-button" aria-label="Alternar tema" title="Alternar tema"><i data-lucide="sun" aria-hidden="true"></i></button><button id="logout" class="secondary-button"><i data-lucide="log-out" aria-hidden="true"></i><span>Sair</span></button></div></header>
   <main class="portal-container portal-main">
     <div class="dashboard-heading"><div><span class="eyebrow">Administração</span><h1>Painel Ephemeros</h1></div><p id="admin-name"></p></div>
-    <div class="admin-tabs"><button class="active" data-tab="requests">Solicitações</button><button data-tab="users">Clientes</button></div>
+    <div class="admin-tabs"><button class="active" data-tab="requests">Solicitações</button><button data-tab="appointments">Reuniões <span id="appointment-badge" class="tab-badge hidden">0</span></button><button data-tab="users">Clientes</button></div>
     <section id="requests-tab" class="panel"><div class="section-title"><h2>Solicitações de conteúdo</h2><span id="request-total"></span></div><div class="toolbar"><input id="request-search" placeholder="Buscar cliente ou solicitação"><select id="status-filter"><option value="">Todos os status</option><option value="recebido">Recebido</option><option value="briefing">Briefing</option><option value="criacao">Em criação</option><option value="revisao">Em revisão</option><option value="aprovado">Aprovado</option><option value="agendado">Agendado</option><option value="publicado">Publicado</option><option value="cancelado">Cancelado</option></select></div><div id="admin-request-list" class="request-list"><div class="empty">Carregando...</div></div></section>
     <section id="users-tab" class="hidden">
       <div class="clients-layout">
@@ -23,6 +23,7 @@
         </div></form>
       </div>
     </section>
+    <section id="appointments-tab" class="panel hidden"><div class="section-title"><div><h2>Reuniões agendadas</h2><p>Agendamentos de 30 minutos feitos pelo site.</p></div><span id="appointment-total"></span></div><div class="toolbar"><input id="appointment-search" placeholder="Buscar nome, empresa ou e-mail"><select id="appointment-filter"><option value="">Todos os status</option><option value="pending">Pendente</option><option value="confirmed">Confirmada</option><option value="cancelled">Cancelada</option></select></div><div id="appointment-list" class="appointment-list"><div class="empty">Carregando...</div></div></section>
   </main>
   <div id="edit-user-modal" class="modal-backdrop hidden">
     <form id="edit-user-form" class="panel modal edit-user-modal">
