@@ -1,11 +1,20 @@
-import { neon } from "@neondatabase/serverless";
+import postgres from "postgres";
 
 let sqlClient;
 let schemaPromise;
 
 export function db() {
-  if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL não configurada");
-  if (!sqlClient) sqlClient = neon(process.env.DATABASE_URL);
+  const databaseUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+  if (!databaseUrl) throw new Error("POSTGRES_URL não configurada");
+  if (!sqlClient) {
+    sqlClient = postgres(databaseUrl, {
+      ssl: "require",
+      max: 1,
+      idle_timeout: 20,
+      connect_timeout: 15,
+      prepare: false
+    });
+  }
   return sqlClient;
 }
 
