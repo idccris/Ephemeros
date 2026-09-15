@@ -211,3 +211,4 @@ function statusLabel(value) {
 }
 
 loadSession();
+window.lucide?.createIcons();

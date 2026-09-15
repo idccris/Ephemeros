@@ -159,7 +159,7 @@ function renderUsers() {
     identity.className = "client-identity";
     const avatar = document.createElement("span");
     avatar.className = "client-avatar";
-    avatar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+    avatar.innerHTML = '<i data-lucide="user-round" aria-hidden="true"></i>';
     const details = document.createElement("div");
     const name = document.createElement("strong");
     name.textContent = user.displayName;
@@ -177,12 +177,13 @@ function renderUsers() {
     finance.textContent = user.financialStatus === "overdue" ? "Em atraso" : "Em dia";
     const button = document.createElement("button");
     button.className = "edit-button";
-    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.2-1 10.6-10.6a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"/><path d="m14.5 6.5 3 3"/></svg><span>Editar</span>';
+    button.innerHTML = '<i data-lucide="pencil" aria-hidden="true"></i><span>Editar</span>';
     button.addEventListener("click", () => openUserEditor(user));
     controls.append(finance, state, button);
     card.append(identity, controls);
     list.append(card);
   });
+  window.lucide?.createIcons();
 }
 
 function openUserEditor(user) {
@@ -268,3 +269,4 @@ function formatDate(value) {
   return new Intl.DateTimeFormat("pt-BR", { timeZone:"UTC" }).format(new Date(String(value).slice(0,10) + "T12:00:00Z"));
 }
 boot();
+window.lucide?.createIcons();
